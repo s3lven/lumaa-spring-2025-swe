@@ -1,9 +1,10 @@
 import express from "express";
 import pool from "../db/index.js";
+import { checkAuth } from "../middleware/checkAuth.js";
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.get("/", checkAuth, async (req, res) => {
   try {
     const result = await pool.query(`SELECT * FROM tasks;`);
 
@@ -16,7 +17,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", checkAuth, async (req, res) => {
   try {
     const { title, description, isComplete } = req.body;
 
@@ -38,7 +39,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", checkAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { title, description, isComplete } = req.body();
@@ -74,7 +75,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", checkAuth, async (req, res) => {
   try {
     const { id } = req.params;
 
