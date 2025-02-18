@@ -43,6 +43,18 @@ router.put("/:id", async (req, res) => {
     const { id } = req.params;
     const { title, description, isComplete } = req.body();
 
+    const idCheck = await pool.query(
+      `
+      SELECT id FROM tasks WHERE id = $1
+      `,
+      [id]
+    );
+
+    if (idCheck.rows.length === 0) {
+      res.status(404).json({ message: `Task ${id} was not found` });
+      return;
+    }
+
     const result = await pool.query(
       `
     UPDATE tasks
@@ -66,7 +78,19 @@ router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const result = await pool.query(
+    const idCheck = await pool.query(
+      `
+      SELECT id FROM tasks WHERE id = $1
+      `,
+      [id]
+    );
+
+    if (idCheck.rows.length === 0) {
+      res.status(404).json({ message: `Task ${id} was not found` });
+      return;
+    }
+
+    await pool.query(
       `
     DELETE FROM tasks
     WHERE id = $1
@@ -74,10 +98,6 @@ router.delete("/:id", async (req, res) => {
     `,
       [id]
     );
-
-    if (result.rows.length === 0) {
-      res.status(404).json({ message: `Task ${id} not found` });
-    }
 
     res.json({ message: `Deleting Task ${id}` });
   } catch (error) {
