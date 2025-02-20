@@ -1,78 +1,15 @@
 import express from "express";
-import type { Request, Response } from "express";
-import pool from "../db";
-import argon2 from "argon2";
-import jwt from "jsonwebtoken";
-import { User } from "../types";
+import type { Request, Response, NextFunction } from "express";
+import { userController } from "../controllers/userController";
 
 const router = express.Router();
 
-router.post("/register", async (req: Request, res: Response) => {
-  try {
-    const { username, password } = req.body;
-    const hashedPassword = await argon2.hash(password);
+router.post("/register", (req: Request, res: Response, next: NextFunction) =>
+  userController.register(req, res, next)
+);
 
-    const result = await pool
-      .insert<User>({
-        username,
-        password: hashedPassword,
-      })
-      .into("users")
-      .returning(["id", "username"]);
-
-    const token = jwt.sign(
-      { userId: result[0].id },
-      process.env.JWT_SECRET!,
-      { expiresIn: "1h" }
-    );
-
-    // Sending token to be used in local storage
-    res.status(201).json({ user: result[0], token });
-  } catch (error: any) {
-    console.error(error);
-    // Catches Postgres error
-    if (error.code === "23505") {
-      res.status(409).json({ error: "Username already exists" });
-      return;
-    }
-    res.status(500).json({ error: "Registration failed" });
-  }
-});
-
-router.post("/login", async (req: Request, res: Response) => {
-  try {
-    const { username, password }: { username: string; password: string } =
-      req.body;
-    const result = await pool
-      .select("*")
-      .from<User>("users")
-      .where({ username });
-
-    if (result.length === 0) {
-      res.status(401).json({ error: "Invalid credentials" });
-      return;
-    }
-
-    const user = result[0];
-    const validPassword = await argon2.verify(user.password, password);
-
-    if (!validPassword) {
-      res.status(401).json({ error: "Invalid credentials" });
-      return;
-    }
-
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
-      expiresIn: "5m",
-    });
-
-    res.json({
-      user: { id: user.id, username: user.username },
-      token,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Login failed" });
-  }
-});
+router.post("/login", (req: Request, res: Response, next: NextFunction) =>
+  userController.login(req, res, next)
+);
 
 export default router;
