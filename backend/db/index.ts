@@ -10,10 +10,10 @@ const pool = new pg.Pool({
   port: parseInt(process.env.DB_PORT || "5432"),
 });
 
-pool.connect((err) => {
-  if (err) return console.error(`Error connecting to the database:`, err.stack);
+// pool.connect((err) => {
+//   if (err) return console.error(`Error connecting to the database:`, err.stack);
 
-  console.log(`[INFO]: Connected to database`);
-});
+//   console.log(`[INFO]: Connected to database`);
+// });
 
 export default pool;
