@@ -15,18 +15,23 @@ export const checkAuth = async (
 
     // Decode the JWT and check if user exists
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-    const result = await pool.query<User>("SELECT * FROM users WHERE id = $1", [
-      decoded.userId,
-    ]);
+    const result = await pool
+      .select("*")
+      .from<User>("users")
+      .where({ id: decoded.userId });
 
     // If they don't throw an error
-    if (result.rows.length === 0) throw new Error("User does not exist.");
+    if (result.length === 0) throw new Error("User does not exist.");
 
     // If all good, set the req.user object and proceed
-    req.user = result.rows[0];
+    req.user = result[0];
     next();
   } catch (error) {
     console.error(error);
-    res.status(401).json({ message: "You are not authenticated. Please login and try again." });
+    res
+      .status(401)
+      .json({
+        message: "You are not authenticated. Please login and try again.",
+      });
   }
 };

@@ -3,8 +3,6 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: "../.env" });
 
-console.log(process.env.PG_CONNECTION_STRING);
-
 const config: { [key: string]: Knex.Config } = {
   development: {
     client: "pg",

@@ -12,19 +12,22 @@ router.post("/register", async (req: Request, res: Response) => {
     const { username, password } = req.body;
     const hashedPassword = await argon2.hash(password);
 
-    const result = await pool.query(
-      "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id, username",
-      [username, hashedPassword]
-    );
+    const result = await pool
+      .insert<User>({
+        username,
+        password: hashedPassword,
+      })
+      .into("users")
+      .returning(["id", "username"]);
 
     const token = jwt.sign(
-      { userId: result.rows[0].id },
+      { userId: result[0].id },
       process.env.JWT_SECRET!,
       { expiresIn: "1h" }
     );
 
     // Sending token to be used in local storage
-    res.status(201).json({ user: result.rows[0], token });
+    res.status(201).json({ user: result[0], token });
   } catch (error: any) {
     console.error(error);
     // Catches Postgres error
@@ -40,17 +43,17 @@ router.post("/login", async (req: Request, res: Response) => {
   try {
     const { username, password }: { username: string; password: string } =
       req.body;
-    const result = await pool.query<User>(
-      "SELECT * FROM users WHERE username = $1",
-      [username]
-    );
+    const result = await pool
+      .select("*")
+      .from<User>("users")
+      .where({ username });
 
-    if (result.rows.length === 0) {
+    if (result.length === 0) {
       res.status(401).json({ error: "Invalid credentials" });
       return;
     }
 
-    const user = result.rows[0];
+    const user = result[0];
     const validPassword = await argon2.verify(user.password, password);
 
     if (!validPassword) {
@@ -59,7 +62,7 @@ router.post("/login", async (req: Request, res: Response) => {
     }
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
-      expiresIn: "1m",
+      expiresIn: "5m",
     });
 
     res.json({

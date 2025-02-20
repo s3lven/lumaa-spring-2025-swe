@@ -14,3 +14,18 @@ export interface User {
 export interface JwtPayload {
   userId: number;
 }
+
+export interface Task {
+  id: number;
+  title: string;
+  description: string;
+  isComplete: boolean;
+}
+
+// Need to find a better way to grab the Task type from database
+export interface TaskPool {
+  id: number;
+  title: string;
+  description: string;
+  is_complete: boolean;
+}

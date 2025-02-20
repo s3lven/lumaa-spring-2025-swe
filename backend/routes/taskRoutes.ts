@@ -1,14 +1,17 @@
 import express from "express";
 import pool from "../db/index.js";
 import { checkAuth } from "../middleware/checkAuth.js";
+import { Task, TaskPool } from "../types/index.js";
 
 const router = express.Router();
 
 router.get("/", checkAuth, async (req, res) => {
   try {
-    const result = await pool.query(`SELECT * FROM tasks;`);
+    const result = await pool.select("*").from<Task>("tasks");
 
-    res.json({ message: "Getting Tasks", payload: result.rows });
+    console.log(result);
+
+    res.json({ message: "Getting Tasks", payload: result });
   } catch (error) {
     let message =
       error instanceof Error ? error.message : `Error adding tasks to database`;
@@ -21,16 +24,11 @@ router.post("/", checkAuth, async (req, res) => {
   try {
     const { title, description, isComplete } = req.body;
 
-    const result = await pool.query(
-      `
-      INSERT INTO tasks (title, description, is_complete)
-      VALUES ($1, $2, $3)
-      RETURNING id, title, description, is_complete as "isComplete";
-    `,
-      [title, description, isComplete]
-    );
+    const result = await pool<TaskPool>("tasks")
+      .insert({ title, description, is_complete: isComplete })
+      .returning(["id", "title", "description", "is_complete as isComplete"]);
 
-    res.status(201).json({ message: "Posting Tasks", payload: result.rows });
+    res.status(201).json({ message: "Posting Tasks", payload: result });
   } catch (error) {
     let message =
       error instanceof Error ? error.message : `Error adding tasks to database`;
@@ -42,31 +40,21 @@ router.post("/", checkAuth, async (req, res) => {
 router.put("/:id", checkAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, isComplete } = req.body();
+    const { title, description, isComplete } = req.body;
 
-    const idCheck = await pool.query(
-      `
-      SELECT id FROM tasks WHERE id = $1
-      `,
-      [id]
-    );
+    const idCheck = await pool<TaskPool>("tasks").select("id").where("id", id);
 
-    if (idCheck.rows.length === 0) {
+    if (idCheck.length === 0) {
       res.status(404).json({ message: `Task ${id} was not found` });
       return;
     }
 
-    const result = await pool.query(
-      `
-    UPDATE tasks
-    SET title = $1, description = $2, is_complete = $3
-    WHERE id = $4
-    RETURNING id, title, description, is_complete as "isComplete"
-    `,
-      [title, description, isComplete]
-    );
+    const result = await pool<TaskPool>("tasks")
+      .where("id", id)
+      .update({ title, description, is_complete: isComplete })
+      .returning(["id", "title", "description", "is_complete as isComplete"]);
 
-    res.json({ message: `Editing Task ${id}`, payload: result.rows });
+    res.json({ message: `Editing Task ${id}`, payload: result });
   } catch (error) {
     let message =
       error instanceof Error ? error.message : `Error editing task on database`;
@@ -79,26 +67,14 @@ router.delete("/:id", checkAuth, async (req, res) => {
   try {
     const { id } = req.params;
 
-    const idCheck = await pool.query(
-      `
-      SELECT id FROM tasks WHERE id = $1
-      `,
-      [id]
-    );
+    const idCheck = await pool<TaskPool>("tasks").select("id").where("id", id);
 
-    if (idCheck.rows.length === 0) {
+    if (idCheck.length === 0) {
       res.status(404).json({ message: `Task ${id} was not found` });
       return;
     }
 
-    await pool.query(
-      `
-    DELETE FROM tasks
-    WHERE id = $1
-    RETURNING *
-    `,
-      [id]
-    );
+    await pool<TaskPool>("tasks").where("id", id).del().returning("*");
 
     res.json({ message: `Deleting Task ${id}` });
   } catch (error) {
