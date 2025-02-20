@@ -1,12 +1,8 @@
-# Full-Stack Coding Challenge
-
-**Deadline**: Sunday, Feb 23th 11:59 pm PST
-
----
+# Task Management Application
 
 ## Overview
 
-Create a “Task Management” application with **React + TypeScript** (frontend), **Node.js** (or **Nest.js**) (backend), and **PostgreSQL** (database). The application should:
+This task management application was built with **React + TypeScript** (frontend), **Node.js** (backend), and **PostgreSQL** (database). The application supports:
 
 1. **Register** (sign up) and **Log in** (sign in) users.
 2. After logging in, allow users to:
@@ -15,12 +11,69 @@ Create a “Task Management” application with **React + TypeScript** (frontend
    - **Update an existing task** (e.g., mark complete, edit).
    - **Delete a task**.
 
-Focus on **correctness**, **functionality**, and **code clarity** rather than visual design.  
-This challenge is intended to be completed within ~3 hours, so keep solutions minimal yet functional.
+---
+
+## Setup Instructions
+
+### Prerequisites
+
+- Node.js (version 20+)
+- npm (version 10+)
+- Postgresql (version 16.6+)
+
+### How to install and run the application
+
+1. Clone the repository:
+
+```bash
+  git clone https://github.com/s3lven/lumaa-spring-2025-swe
+  cd lumaa-spring-2025-swe
+```
+
+2. Navigate to the backend and install dependencies
+
+```bash
+  cd backend
+  npm install
+  npm run dev
+```
+
+3. In a separate terminal, navigate to the frontend and install dependencies
+
+```bash
+  cd frontend
+  npm install
+  npm run dev
+```
+
+### Environment Variables
+
+Create a `.env` file and ensure that it is getting ignored by git. This file should contain the JWT secrets and database connection string.
+
+```.env
+# PostgreSQL connection string in the format:
+# postgres://username:password@host:port/database
+PG_CONNECTION_STRING=postgres://your_username:your_password@localhost:5432/your_database
+
+# If needed, break up the connection string into
+DB_USER, DB_PASSWORD, DB_NAME, DB_HOST, and DB_PORT variables.
+
+# JWT secret for signing/verifying tokens. Use a strong random string.
+JWT_SECRET=your_strong_jwt_secret
+```
+
+### How to setup the database
+
+Navigate to the backend and run the migration script. This will create empty tables for `tasks` and `users`.
+
+```bash
+  cd backend
+  npm run migrate:latest
+```
 
 ---
 
-## Requirements
+## Features
 
 ### 1. Authentication
 
@@ -31,31 +84,26 @@ This challenge is intended to be completed within ~3 hours, so keep solutions mi
 - **Endpoints**:
   - `POST /auth/register` – Create a new user
   - `POST /auth/login` – Login user, return a token (e.g., JWT)
-- **Secure the Tasks Routes**: Only authenticated users can perform task operations.  
-  - **Password Hashing**: Use `bcrypt` or another hashing library to store passwords securely.
-  - **Token Verification**: Verify the token (JWT) on each request to protected routes.
+- **Secure the Tasks Routes**: Only authenticated users can perform task operations.
+  - **Password Hashing**: Uses `argon2` to store passwords securely.
+  - **Token Verification**: Verifies the token (JWT) on each request to protected routes.
 
-### 2. Backend (Node.js or Nest.js)
+### 2. Backend
 
-- **Tasks CRUD**:  
-  - `GET /tasks` – Retrieve a list of tasks (optionally filtered by user).  
-  - `POST /tasks` – Create a new task.  
-  - `PUT /tasks/:id` – Update a task (e.g., mark as complete, edit text).  
+- **Tasks CRUD**:
+  - `GET /tasks` – Retrieve a list of tasks.
+  - `POST /tasks` – Create a new task.
+  - `PUT /tasks/:id` – Update a task (e.g., mark as complete, edit text).
   - `DELETE /tasks/:id` – Delete a task.
 - **Task Model**:
   - `id`: Primary key
   - `title`: string
   - `description`: string (optional)
   - `isComplete`: boolean (default `false`)
-  - _(Optional)_ `userId` to link tasks to the user who created them
 - **Database**: PostgreSQL
   - Provide instructions/migrations to set up:
     - `users` table (with hashed passwords)
     - `tasks` table
-- **Setup**:
-  - `npm install` to install dependencies
-  - `npm run start` (or `npm run dev`) to run the server
-  - Document any environment variables (e.g., database connection string, JWT secret)
 
 ### 3. Frontend (React + TypeScript)
 
@@ -78,42 +126,6 @@ This challenge is intended to be completed within ~3 hours, so keep solutions mi
 
 ---
 
-## Deliverables
-
-1. **Fork the Public Repository**: **Fork** this repo into your own GitHub account.
-2. **Implement Your Solution** in the forked repository. Make sure you're README file has:
-   - Steps to set up the database (migrations, environment variables).
-   - How to run the backend.
-   - How to run the frontend.
-   - Any relevant notes on testing.
-   - Salary Expectations per month (Mandatory)
-3. **Short Video Demo**: Provide a link (in a `.md` file in your forked repo) to a brief screen recording showing:
-   - Registering a user
-   - Logging in
-   - Creating, updating, and deleting tasks
-4. **Deadline**: Submissions are due **Sunday, Feb 23th 11:59 pm PST**.
-
-> **Note**: Please keep your solution minimal. The entire project is intended to be completed in around 3 hours. Focus on core features (registration, login, tasks CRUD) rather than polished UI or extra features.
-
----
-
-## Evaluation Criteria
-
-1. **Functionality**  
-   - Does registration and login work correctly (with password hashing)?
-   - Are tasks protected by authentication?
-   - Does the tasks CRUD flow work end-to-end?
-
-2. **Code Quality**  
-   - Is the code structured logically and typed in TypeScript?
-   - Are variable/function names descriptive?
-
-3. **Clarity**  
-   - Is the `README.md` (in your fork) clear and detailed about setup steps?
-   - Easy to run and test?
-
-4. **Maintainability**  
-   - Organized logic (controllers/services, etc.)
-   - Minimal hard-coded values
-
-Good luck, and we look forward to your submission!
+## Other Deliverables
+- Video Demo
+- Salary Expectations per Month
