@@ -1,4 +1,4 @@
-import { getToken } from "@/lib/auth";
+import { getToken, removeToken } from "@/lib/auth";
 import { Task, TaskPool } from "@/types";
 
 const API_URL = "/api/tasks";
@@ -23,6 +23,10 @@ export const addTask = async (formData: {
     body: JSON.stringify(formData),
   });
   if (!response.ok) {
+    if (response.status === 401) {
+      // Handle unauthenticated access
+      removeToken();
+    }
     throw new Error("Failed to create task");
   }
   const responseData: APIResponse<Task> = await response.json();
@@ -38,6 +42,10 @@ export const getTasks = async () => {
     },
   });
   if (!response.ok) {
+    if (response.status === 401) {
+      // Handle unauthenticated access
+      removeToken();
+    }
     throw new Error("Failed to fetch tasks");
   }
   const responseData: APIResponse<TaskPool[]> = await response.json();
@@ -65,6 +73,10 @@ export const updateTask = async ({
     body: JSON.stringify(updates),
   });
   if (!response.ok) {
+    if (response.status === 401) {
+      // Handle unauthenticated access
+      removeToken();
+    }
     throw new Error("Failed to update task");
   }
   return await response.json();
@@ -80,6 +92,10 @@ export const deleteTask = async (id: string) => {
     },
   });
   if (!response.ok) {
+    if (response.status === 401) {
+      // Handle unauthenticated access
+      removeToken();
+    }
     throw new Error("Failed to delete task");
   }
 };
