@@ -4,7 +4,7 @@ import { Task } from "../types";
 
 export class TaskService {
   async getTasks(): Promise<Task[]> {
-    return pool<Task>("tasks").select("*");
+    return pool<Task>("tasks").select("*").orderBy("id", "desc");
   }
 
   async getTaskById(id: number): Promise<Task> {
@@ -13,7 +13,7 @@ export class TaskService {
       if (!task) throw new AppError("Task not found", 404);
       return task;
     } catch (error: any) {
-      if (error.code === '42703') {
+      if (error.code === "42703") {
         throw new AppError("Task not found", 404);
       } else {
         throw new AppError("Internal server error", 500);
@@ -30,13 +30,13 @@ export class TaskService {
   async updateTask(id: number, data: Partial<Task>): Promise<Task> {
     try {
       const [updatedTask] = await pool<Task>("tasks")
-        .where({ id })
+        .where("id", id)
         .update(data)
         .returning("*");
       if (!updatedTask) throw new AppError("Task not found", 404);
       return updatedTask;
     } catch (error: any) {
-      if (error.code === '42703') {
+      if (error.code === "42703") {
         throw new AppError("Task not found", 404);
       } else {
         throw new AppError("Internal server error", 500);
