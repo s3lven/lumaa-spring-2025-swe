@@ -1,19 +1,8 @@
 import dotenv from "dotenv";
-import pg from "pg"
+import knex from "knex";
+import knexfile from "./knexfile";
 dotenv.config();
 
-const pool = new pg.Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: parseInt(process.env.DB_PORT || "5432"),
-});
-
-pool.connect((err) => {
-  if (err) return console.error(`Error connecting to the database:`, err.stack);
-
-  console.log(`[INFO]: Connected to database`);
-});
+const pool = knex(knexfile[process.env.NODE_ENV || "development"]);
 
 export default pool;
