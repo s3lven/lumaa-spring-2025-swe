@@ -1,14 +1,15 @@
 import argon2 from "argon2";
-import { User } from "../types";
+import { User } from "../models/authModel";
 import jwt from "jsonwebtoken";
 import pool from "../db";
 import { AppError } from "../src/utils/AppError";
+import { UserDTO } from "../types";
 
 export class UserService {
   async register(
     username: string,
     password: string
-  ): Promise<{ user: Omit<User, "password">; token: string }> {
+  ): Promise<UserDTO> {
     try {
       const hashedPassword = await argon2.hash(password);
 

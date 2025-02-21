@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { taskService } from "../services/taskService";
 import { AppError } from "../src/utils/AppError";
-import { Task, TaskPool } from "../types";
+import { Task } from "../models/taskModel";
 
 export class TaskController {
   async getTasks(req: Request, res: Response, next: NextFunction) {
@@ -52,7 +52,7 @@ export class TaskController {
       }
 
       // Could use more sanitization and validation here
-      const task: Partial<TaskPool> = {
+      const task: Partial<Task> = {
         title,
         description: description || "",
         is_complete: isComplete,

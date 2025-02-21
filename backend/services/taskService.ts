@@ -1,16 +1,32 @@
 import pool from "../db";
+import { Task } from "../models/taskModel";
 import { AppError } from "../src/utils/AppError";
-import { Task } from "../types";
+import { TaskDTO } from "../types";
 
 export class TaskService {
-  async getTasks(): Promise<Task[]> {
-    return pool<Task>("tasks").select("*").orderBy("id", "desc");
+  async getTasks(): Promise<TaskDTO[]> {
+    try {
+      const result = await pool<Task>("tasks")
+        .select("*")
+        .orderBy("id", "desc");
+      const tasks: TaskDTO[] = result.map((task) => ({
+        isComplete: task.is_complete,
+        ...task,
+      }));
+      return tasks;
+    } catch (error: any) {
+      throw new AppError("Internal server error", 500);
+    }
   }
 
-  async getTaskById(id: number): Promise<Task> {
+  async getTaskById(id: number): Promise<TaskDTO> {
     try {
-      const task = await pool<Task>("tasks").where({ id }).first();
-      if (!task) throw new AppError("Task not found", 404);
+      const result = await pool<Task>("tasks").where({ id }).first();
+      if (!result) throw new AppError("Task not found", 404);
+      const task: TaskDTO = {
+        isComplete: result.is_complete,
+        ...result,
+      };
       return task;
     } catch (error: any) {
       if (error.code === "42703") {
@@ -21,19 +37,27 @@ export class TaskService {
     }
   }
 
-  async createTask(data: Partial<Task>): Promise<Task> {
+  async createTask(data: Partial<Task>): Promise<TaskDTO> {
     if (!data.title) throw new AppError("Title is required", 400);
-    const [newTask] = await pool<Task>("tasks").insert(data).returning("*");
+    const [result] = await pool<Task>("tasks").insert(data).returning("*");
+    const newTask: TaskDTO = {
+      isComplete: result.is_complete,
+      ...result,
+    };
     return newTask;
   }
 
-  async updateTask(id: number, data: Partial<Task>): Promise<Task> {
+  async updateTask(id: number, data: Partial<Task>): Promise<TaskDTO> {
     try {
-      const [updatedTask] = await pool<Task>("tasks")
+      const [result] = await pool<Task>("tasks")
         .where("id", id)
         .update(data)
         .returning("*");
-      if (!updatedTask) throw new AppError("Task not found", 404);
+      if (!result) throw new AppError("Task not found", 404);
+      const updatedTask: TaskDTO = {
+        isComplete: result.is_complete,
+        ...result,
+      };
       return updatedTask;
     } catch (error: any) {
       if (error.code === "42703") {
@@ -45,8 +69,16 @@ export class TaskService {
   }
 
   async deleteTask(id: number): Promise<void> {
-    const deleted = await pool("tasks").where({ id }).del();
-    if (!deleted) throw new AppError("Task not found", 404);
+    try {
+      const deleted = await pool("tasks").where({ id }).del();
+      if (!deleted) throw new AppError("Task not found", 404);
+    } catch (error: any) {
+      if (error.code === "42703") {
+        throw new AppError("Task not found", 404);
+      } else {
+        throw new AppError("Internal server error", 500);
+      }
+    }
   }
 }
 

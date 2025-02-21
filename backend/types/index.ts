@@ -1,3 +1,5 @@
+import { User } from "../models/authModel";
+
 // Grab req.user from Request
 declare module "express" {
   interface Request {
@@ -5,27 +7,18 @@ declare module "express" {
   }
 }
 
-export interface User {
-  id: number;
-  username: string;
-  password: string;
-}
-
 export interface JwtPayload {
   userId: number;
 }
 
-export interface Task {
+export interface TaskDTO {
   id: number;
   title: string;
   description: string;
   isComplete: boolean;
 }
 
-// Need to find a better way to grab the Task type from database
-export interface TaskPool {
-  id: number;
-  title: string;
-  description: string;
-  is_complete: boolean;
+export interface UserDTO {
+  user: Omit<User, "password">;
+  token: string;
 }
