@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { taskService } from "../services/taskService";
+import { AppError } from "../src/utils/AppError";
+import { Task } from "../types";
 
 export class TaskController {
   async getTasks(req: Request, res: Response, next: NextFunction) {
@@ -14,6 +16,10 @@ export class TaskController {
   async getTaskById(req: Request, res: Response, next: NextFunction) {
     try {
       const id = parseInt(req.params.id);
+
+      if (isNaN(id)) {
+        throw new AppError("Invalid task ID", 400);
+      }
       const task = await taskService.getTaskById(id);
       res.json({ message: "Getting Task", payload: task });
     } catch (error) {
@@ -24,6 +30,9 @@ export class TaskController {
   async createTask(req: Request, res: Response, next: NextFunction) {
     try {
       const { title, description } = req.body;
+      if (!title) {
+        throw new AppError("Title is required", 400);
+      }
       const newTask = await taskService.createTask({ title, description });
       res.status(201).json({ message: "Posting Tasks", payload: newTask });
     } catch (error) {
@@ -34,7 +43,22 @@ export class TaskController {
   async updateTask(req: Request, res: Response, next: NextFunction) {
     try {
       const id = parseInt(req.params.id);
-      const updatedTask = await taskService.updateTask(id, req.body);
+      if (isNaN(id)) {
+        throw new AppError("Invalid task ID", 400);
+      }
+      const { title, description, isComplete } = req.body;
+      if (!title || !isComplete) {
+        throw new AppError("Missing required fields", 400);
+      }
+
+      // Could use more sanitization and validation here
+      const task: Partial<Task> = {
+        title,
+        description: description || "",
+        isComplete,
+      };
+
+      const updatedTask = await taskService.updateTask(id, task);
       res.json({ message: `Updating Task ${id}`, payload: updatedTask });
     } catch (error) {
       next(error);

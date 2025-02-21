@@ -20,8 +20,6 @@ export class UserService {
         .into("users")
         .returning(["id", "username"]);
 
-      console.log("RESULT:", result);
-
       const token = jwt.sign({ userId: result.id }, process.env.JWT_SECRET!, {
         expiresIn: "1h",
       });
