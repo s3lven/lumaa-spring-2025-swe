@@ -1,5 +1,5 @@
 import { getToken } from "@/lib/auth";
-import { Task } from "@/types";
+import { Task, TaskPool } from "@/types";
 
 const API_URL = "/api/tasks";
 
@@ -40,9 +40,14 @@ export const getTasks = async () => {
   if (!response.ok) {
     throw new Error("Failed to fetch tasks");
   }
-  const data: APIResponse<Task[]> = await response.json();
-  console.log(data.payload);
-  return data.payload;
+  const responseData: APIResponse<TaskPool[]> = await response.json();
+  const applicationData: Task[] = responseData.payload.map((task) => ({
+    id: task.id,
+    title: task.title,
+    isComplete: task.is_complete,
+    description: task.description || "",
+  }));
+  return applicationData;
 };
 
 export const updateTask = async ({

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { taskService } from "../services/taskService";
 import { AppError } from "../src/utils/AppError";
-import { Task } from "../types";
+import { Task, TaskPool } from "../types";
 
 export class TaskController {
   async getTasks(req: Request, res: Response, next: NextFunction) {
@@ -52,10 +52,10 @@ export class TaskController {
       }
 
       // Could use more sanitization and validation here
-      const task: Partial<Task> = {
+      const task: Partial<TaskPool> = {
         title,
         description: description || "",
-        isComplete,
+        is_complete: isComplete,
       };
 
       const updatedTask = await taskService.updateTask(id, task);
