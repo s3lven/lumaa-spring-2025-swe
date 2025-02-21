@@ -15,7 +15,7 @@ interface TaskItemProps {
 }
 
 export default function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
-  const [isEditing, setIsEditing] = useState(task.isComplete);
+  const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(task.title);
   const [editedDescription, setEditedDescription] = useState(
     task.description || ""
