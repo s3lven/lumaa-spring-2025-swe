@@ -8,8 +8,8 @@ const app = express();
 
 app.use(express.json());
 
-app.use("/tasks", taskRoutes);
-app.use("/auth", userRoutes);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/auth", userRoutes);
 
 app.use(errorHandler);
 

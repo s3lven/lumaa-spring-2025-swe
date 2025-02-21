@@ -47,7 +47,7 @@ export class TaskController {
         throw new AppError("Invalid task ID", 400);
       }
       const { title, description, isComplete } = req.body;
-      if (!title || !isComplete) {
+      if (!title) {
         throw new AppError("Missing required fields", 400);
       }
 
