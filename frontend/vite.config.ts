@@ -1,6 +1,10 @@
 import { defineConfig, UserConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import dotenv from "dotenv";
+dotenv.config()
+
+const backendHost = process.env.VITE_BACKEND_HOST
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -13,7 +17,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:3000",
+        target: backendHost,
         changeOrigin: true,
         secure: false,
       },
