@@ -46,6 +46,7 @@ export default function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
           onCheckedChange={(checked) =>
             onUpdate({
               title: task.title,
+              description: task.description,
               isComplete: checked as boolean,
             })
           }
