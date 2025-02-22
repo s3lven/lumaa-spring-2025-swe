@@ -70,7 +70,7 @@ export default function RegisterForm() {
           {registerMutation.isError && (
             <Alert variant="destructive">
               <AlertDescription>
-                Registration failed. Please try again.
+                {registerMutation.error?.message || "Registration failed"}
               </AlertDescription>
             </Alert>
           )}

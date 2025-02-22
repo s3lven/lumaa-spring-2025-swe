@@ -29,7 +29,9 @@ export const register = async (userData: {
     body: JSON.stringify(userData),
   });
   if (!response.ok) {
-    throw new Error("Registration failed");
+    const error = await response.json()
+    const errorMessage = error.error || "Registration failed";
+    throw new Error(errorMessage);
   }
   return response.json();
 };
