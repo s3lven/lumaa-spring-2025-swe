@@ -13,7 +13,7 @@ export class UserService {
     try {
       const hashedPassword = await argon2.hash(password);
 
-      const result: Omit<User, "password"> = await pool
+      const result: Omit<User, "password">[]= await pool
         .insert<User>({
           username,
           password: hashedPassword,
@@ -21,11 +21,11 @@ export class UserService {
         .into("users")
         .returning(["id", "username"]);
 
-      const token = jwt.sign({ userId: result.id }, process.env.JWT_SECRET!, {
-        expiresIn: "1h",
+      const token = jwt.sign({ userId: result[0].id }, process.env.JWT_SECRET!, {
+        expiresIn: "5m",
       });
 
-      return { user: result, token };
+      return { user: result[0], token };
     } catch (error: any) {
       if (error.code === "23505") {
         throw new AppError("Username already exists", 409);
@@ -42,7 +42,7 @@ export class UserService {
     const result = await pool
       .select("*")
       .from<User>("users")
-      .where({ username });
+      .where("username", username);
 
     if (result.length === 0) throw new AppError("Invalid credentials", 401);
 
@@ -52,7 +52,7 @@ export class UserService {
     if (!validPassword) throw new AppError("Invalid credentials", 401);
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
-      expiresIn: "1m",
+      expiresIn: "5m",
     });
 
     return { user: { id: user.id, username: user.username }, token };

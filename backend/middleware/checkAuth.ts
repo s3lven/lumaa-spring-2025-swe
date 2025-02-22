@@ -1,7 +1,7 @@
 import type { Response, Request, NextFunction } from "express";
-import { User } from "../types";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import pool from "../db";
+import { User } from "../models/authModel";
 
 export const checkAuth = async (
   req: Request,
